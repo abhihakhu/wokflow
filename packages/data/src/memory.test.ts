@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@wokflow/core';
 import { createMemoryCollection, createMemoryStore } from './memory.js';
+import { describeStoreContract } from './store.contract.js';
+
+describeStoreContract('memory', async () => createMemoryStore());
 
 const task: Task = {
   id: 't1',

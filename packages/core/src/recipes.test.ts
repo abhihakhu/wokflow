@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { isFinalStep, recipeProgress, recipeSteps } from './recipes.js';
+import {
+  createRecipe,
+  isFinalStep,
+  nextStepIndex,
+  recipeProgress,
+  recipeSteps,
+  reorderSteps,
+  updateRecipe,
+} from './recipes.js';
 import type { Task } from './types.js';
 
 let n = 0;
@@ -64,5 +72,52 @@ describe('recipes', () => {
     expect(isFinalStep(almost, c)).toBe(true);
     expect(isFinalStep(exam, x)).toBe(false);
     expect(a.status).toBe('done');
+  });
+});
+
+describe('recipe editing', () => {
+  const T0 = '2026-11-24T20:00:00.000Z';
+  const T1 = '2026-11-25T08:00:00.000Z';
+
+  it('creates and updates recipes with validation', () => {
+    const r = createRecipe(
+      { title: ' ECE 264 exam ', kind: 'signature', dueAt: '2026-12-10' },
+      'r9',
+      T0,
+    );
+    expect(r).toEqual({
+      id: 'r9',
+      title: 'ECE 264 exam',
+      kind: 'signature',
+      dueAt: '2026-12-10',
+      createdAt: T0,
+      updatedAt: T0,
+    });
+    const u = updateRecipe(r, { title: 'Final review', kind: 'recipe', dueAt: null }, T1);
+    expect(u).toMatchObject({ title: 'Final review', kind: 'recipe', updatedAt: T1 });
+    expect(u).not.toHaveProperty('dueAt');
+    expect(updateRecipe(r, { dueAt: '2026-12-12' }, T1).dueAt).toBe('2026-12-12');
+    expect(() => createRecipe({ title: 'x', kind: 'boss' as never }, 'r', T0)).toThrow(/signature/);
+    expect(() => updateRecipe(r, { title: '' }, T1)).toThrow(/name/);
+  });
+
+  it('appends new steps at the end', () => {
+    expect(nextStepIndex(exam, 'r1')).toBe(3);
+    expect(nextStepIndex(exam, 'empty')).toBe(0);
+  });
+
+  it('reorders steps and returns only the moved ones', () => {
+    const moved = reorderSteps(exam, 'r1', ['a', 'c', 'b'], T1);
+    expect(moved.map((t) => [t.id, t.stepIndex])).toEqual([
+      ['c', 1],
+      ['b', 2],
+    ]);
+    expect(moved.every((t) => t.updatedAt === T1)).toBe(true);
+  });
+
+  it('rejects incomplete or duplicate orders', () => {
+    expect(() => reorderSteps(exam, 'r1', ['a', 'b'], T1)).toThrow(/every step/);
+    expect(() => reorderSteps(exam, 'r1', ['a', 'a', 'b'], T1)).toThrow(/every step/);
+    expect(() => reorderSteps(exam, 'r1', ['a', 'b', 'x'], T1)).toThrow(/every step/);
   });
 });

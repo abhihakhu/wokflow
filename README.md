@@ -26,10 +26,10 @@ coins = focused minutes + 10 (reflection with ≥ 2 real sentences) + focus rati
 ```
 wokflow/
 ├─ apps/
-│  └─ desktop/          # React + Vite UI, Tauri 2 shell (src-tauri/)
+│  └─ desktop/          # React + Vite UI (views/, state/), Tauri 2 shell (src-tauri/)
 ├─ packages/
 │  ├─ core/             # pure domain logic: sessions, rewards, recipes (no I/O)
-│  ├─ data/             # Collection / Store / Platform interfaces + in-memory adapter
+│  ├─ data/             # Store / Platform interfaces, in-memory + SQLite adapters, migrations
 │  └─ companion/        # character pack schema, validation, state → animation mapping
 ├─ packs/
 │  └─ default/          # "Ember", the original default companion
@@ -38,9 +38,10 @@ wokflow/
 
 - **Core is pure.** Every session transition takes `now` explicitly, so the whole focus timer, including pauses and leave detection, is deterministic and unit-tested.
 - **Platforms are injected.** The UI depends on a `Platform` interface (`store`, `notify`, `onAppHidden`, `onAppVisible`). Desktop and Android each provide one, so core and UI never import Tauri or Capacitor.
+- **Storage is swappable.** A two-method `SqlDriver` sits under a document-style SQLite store; the same contract tests run against the in-memory and SQLite adapters.
 - **Companions are packs.** Drop a folder in `packs/` with a `pack.json` and sprite sheets. Only the default pack is committed; see [packs/README.md](packs/README.md).
 
-Decisions: [stack](docs/adr/0001-monorepo-and-stack.md) · [character packs](docs/adr/0002-character-packs.md) · [leave detection](docs/adr/0003-leave-detection.md) · [visual direction](docs/adr/0004-visual-direction.md)
+Decisions: [stack](docs/adr/0001-monorepo-and-stack.md) · [character packs](docs/adr/0002-character-packs.md) · [leave detection](docs/adr/0003-leave-detection.md) · [visual direction](docs/adr/0004-visual-direction.md) · [SQLite storage](docs/adr/0005-sqlite-storage.md)
 
 ## Getting started
 
@@ -48,7 +49,7 @@ Requires Node 22+ and pnpm 10 (`corepack enable`).
 
 ```bash
 pnpm install
-pnpm dev          # web build at http://localhost:5173
+pnpm dev          # browser build at http://localhost:5173 (demo data, resets on reload)
 pnpm test         # unit tests
 pnpm coverage     # with coverage thresholds (80%)
 pnpm lint && pnpm typecheck
@@ -60,14 +61,14 @@ Install Rust (`rustup`) and the [Tauri prerequisites](https://v2.tauri.app/start
 
 ```bash
 cd apps/desktop
-pnpm tauri dev    # native window with hot reload
+pnpm tauri dev    # native window with hot reload; data persists in SQLite
 pnpm tauri build  # installer in src-tauri/target/release/bundle
 ```
 
 ## Roadmap
 
 - [x] **M1** Monorepo, CI, core domain + tests, data interfaces, pack schema, working Prep → Simmer → Plate loop
-- [ ] **M2** SQLite storage (Tauri), task editing, recipes and signature dishes
+- [x] **M2** SQLite storage (Tauri), task editing, recipes and signature dishes, persistent wallet
 - [ ] **M3** PixiJS kitchen scene + default companion art → README GIF
 - [ ] **M4** Pack loader from disk (personal packs)
 - [ ] **M5** Rewards UI, decor → **v0.1 release**

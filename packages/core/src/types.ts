@@ -6,11 +6,14 @@ export type EpochMs = number;
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 
+/** A plain YYYY-MM-DD date or a full ISO-8601 timestamp. */
+export type DueDate = string;
+
 export interface Task {
   id: string;
   title: string;
   notes?: string;
-  dueAt?: Timestamp;
+  dueAt?: DueDate;
   /** How many focus sessions the user expects this to take. */
   estSessions: number;
   tags: string[];
@@ -30,7 +33,7 @@ export interface Recipe {
   id: string;
   title: string;
   kind: RecipeKind;
-  dueAt?: Timestamp;
+  dueAt?: DueDate;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
