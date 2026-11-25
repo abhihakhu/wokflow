@@ -1,7 +1,5 @@
 # WokFlow 锅
 
-**A cozy, gamified focus and planning app. Fire up the wok, find your flow.**
-
 [![CI](https://github.com/abhihakhu/wokflow/actions/workflows/ci.yml/badge.svg)](https://github.com/abhihakhu/wokflow/actions/workflows/ci.yml)
 
 WokFlow turns a study or work session into cooking a dish in a traditional harbor kitchen, with a companion character who cooks alongside you. It is built for two problems: **getting started**, and **staying focused long enough to actually understand** what you're working on.
