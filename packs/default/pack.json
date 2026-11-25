@@ -1,0 +1,23 @@
+{
+  "id": "default",
+  "name": "Ember",
+  "renderer": "sprites",
+  "states": {
+    "idle": "idle",
+    "focus": "cooking",
+    "away": "notice",
+    "complete": "cheer"
+  },
+  "sprites": {
+    "idle": { "sheet": "idle.png", "frames": 1, "fps": 1 },
+    "cooking": { "sheet": "cooking.png", "frames": 1, "fps": 1 },
+    "notice": { "sheet": "notice.png", "frames": 1, "fps": 1 },
+    "cheer": { "sheet": "cheer.png", "frames": 1, "fps": 1, "loop": false }
+  },
+  "lines": {
+    "prep": ["What are we cooking up today?", "Mise en place first. What’s the tiniest step?"],
+    "focus": ["Wok’s hot. One step at a time.", "Low heat, steady hands."],
+    "away": ["Hey, the pot’s still on…", "Back to the wok?"],
+    "complete": ["Order up! Let’s plate it.", "Smells great. What did we learn?"]
+  }
+}

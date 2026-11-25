@@ -1,0 +1,16 @@
+{
+  "name": "@wokflow/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure domain logic for WokFlow: tasks, recipes, focus sessions and rewards.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.7"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@wokflow/data",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Storage interface for WokFlow plus adapters (in-memory now; Tauri SQL and Capacitor SQLite next).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@wokflow/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.7"
+  }
+}
