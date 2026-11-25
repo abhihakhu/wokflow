@@ -1,0 +1,19 @@
+{
+  "name": "@wokflow/scene",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The animated WokFlow kitchen: PixiJS layers, steam and fire particles, and the companion sprite player.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./assets/*": "./assets/*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@wokflow/companion": "workspace:*",
+    "@wokflow/core": "workspace:*",
+    "pixi.js": "^8.23.0"
+  }
+}

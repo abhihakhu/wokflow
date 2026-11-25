@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import {
   WALLET,
   companionStateFor,
@@ -15,17 +15,23 @@ import {
   type Session,
   type Task,
 } from '@wokflow/core';
-import { parsePack, pickLine } from '@wokflow/companion';
+import { pickLine } from '@wokflow/companion';
 import type { Platform } from '@wokflow/data';
-import defaultPackJson from '../../../packs/default/pack.json';
-import { formatClock } from './format';
+import { selectPack } from './packs';
 import { useKitchen } from './state/useKitchen';
 import { Menu } from './views/Menu';
 import { RecipeEditor } from './views/RecipeEditor';
 import { Plate, Prep, Simmer } from './views/Session';
 import { TaskEditor } from './views/TaskEditor';
+import { Timer } from './views/Timer';
 
-const pack = parsePack(defaultPackJson);
+// PixiJS is large; load the scene after the menu so the app is usable immediately.
+const KitchenScene = lazy(() =>
+  import('./scene/KitchenScene').then((m) => ({ default: m.KitchenScene })),
+);
+
+const companion = selectPack();
+const { pack } = companion;
 
 type Panel =
   | { view: 'menu' }
@@ -96,19 +102,22 @@ export function App({ platform }: { platform: Platform }) {
 
       <main className="layout">
         <section className="scene" aria-label="Kitchen">
-          <div className="companion-slot">
-            <p className="bubble">{line}</p>
-            <div className="slot-box">
-              {pack.name} · {companionState}
-            </div>
-          </div>
+          <Suspense fallback={null}>
+            <KitchenScene state={companionState} companion={companion} />
+          </Suspense>
+          <p className="bubble" aria-live="polite">
+            <span className="sr-only">{pack.name} says: </span>
+            {line}
+          </p>
           {session && (session.phase === 'simmer' || session.phase === 'paused') && (
-            <div className="timer" role="timer" aria-live="off">
-              <span className="timer-clock">{formatClock(remainingMs(session, now))}</span>
-              <span className="timer-task">{activeTask?.title}</span>
-              {session.awayCount > 0 && (
-                <span className="muted">Stepped away {session.awayCount}×</span>
-              )}
+            <div role="timer" aria-live="off" className="timer-wrap">
+              <Timer
+                remainingMs={remainingMs(session, now)}
+                plannedMs={session.plannedMin * 60_000}
+                task={activeTask?.title}
+                label={session.phase === 'paused' ? 'Paused' : 'Simmering'}
+                note={session.awayCount > 0 ? `Stepped away ${session.awayCount}×` : undefined}
+              />
             </div>
           )}
         </section>

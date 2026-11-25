@@ -9,10 +9,34 @@
     "complete": "cheer"
   },
   "sprites": {
-    "idle": { "sheet": "idle.png", "frames": 1, "fps": 1 },
-    "cooking": { "sheet": "cooking.png", "frames": 1, "fps": 1 },
-    "notice": { "sheet": "notice.png", "frames": 1, "fps": 1 },
-    "cheer": { "sheet": "cheer.png", "frames": 1, "fps": 1, "loop": false }
+    "idle": {
+      "sheet": "idle.png",
+      "frames": 12,
+      "fps": 8,
+      "frameWidth": 256,
+      "frameHeight": 320
+    },
+    "cooking": {
+      "sheet": "cooking.png",
+      "frames": 12,
+      "fps": 12,
+      "frameWidth": 256,
+      "frameHeight": 320
+    },
+    "notice": {
+      "sheet": "notice.png",
+      "frames": 8,
+      "fps": 8,
+      "frameWidth": 256,
+      "frameHeight": 320
+    },
+    "cheer": {
+      "sheet": "cheer.png",
+      "frames": 10,
+      "fps": 12,
+      "frameWidth": 256,
+      "frameHeight": 320
+    }
   },
   "lines": {
     "prep": ["What are we cooking up today?", "Mise en place first. What’s the tiniest step?"],

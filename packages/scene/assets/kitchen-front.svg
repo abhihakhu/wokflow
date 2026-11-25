@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <!-- counter -->
+  <rect x="0" y="640" width="1600" height="360" fill="#3A1F16"/>
+  <rect x="0" y="620" width="1600" height="30" fill="#6B3A26"/>
+  <rect x="0" y="648" width="1600" height="6" fill="#C9A24A" opacity="0.7"/>
+  <g fill="none" stroke="#5A3020" stroke-width="4">
+    <path d="M80 720 h200 v100 h-200z"/>
+    <path d="M100 740 q80 30 160 0 M100 800 q80 -30 160 0"/>
+    <path d="M360 720 h200 v100 h-200z"/>
+    <path d="M380 740 q80 30 160 0 M380 800 q80 -30 160 0"/>
+    <path d="M1240 720 h200 v100 h-200z"/>
+    <path d="M1260 740 q80 30 160 0 M1260 800 q80 -30 160 0"/>
+  </g>
+
+  <!-- brick stove; the fire inside its mouth is animated -->
+  <path d="M620 500 h280 v120 h-280z" fill="#8A4A32"/>
+  <g stroke="#6A3524" stroke-width="3">
+    <line x1="620" y1="530" x2="900" y2="530"/>
+    <line x1="620" y1="560" x2="900" y2="560"/>
+    <line x1="620" y1="590" x2="900" y2="590"/>
+    <line x1="690" y1="500" x2="690" y2="530"/>
+    <line x1="780" y1="530" x2="780" y2="560"/>
+    <line x1="850" y1="560" x2="850" y2="590"/>
+    <line x1="700" y1="590" x2="700" y2="620"/>
+  </g>
+  <path d="M710 620 v-40 a50 30 0 0 1 100 0 v40z" fill="#1A0D08"/>
+
+  <!-- wok -->
+  <path d="M640 496 q120 60 240 0 z" fill="#2B2B2E"/>
+  <path d="M636 494 h248" stroke="#4A4A50" stroke-width="8" stroke-linecap="round"/>
+  <path d="M884 492 q40 -10 60 -40" stroke="#5C3020" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <g fill="#E08A3A"><circle cx="720" cy="486" r="9"/><circle cx="748" cy="480" r="8"/><circle cx="782" cy="484" r="9"/></g>
+  <g fill="#C8362B"><path d="M760 488 q8 -16 18 -6z"/><path d="M800 486 q8 -14 16 -4z"/></g>
+  <g fill="#6FA05A"><circle cx="736" cy="478" r="5"/><circle cx="800" cy="476" r="5"/></g>
+
+  <!-- bamboo steamers -->
+  <rect x="960" y="574" width="110" height="46" rx="6" fill="#C9A46A"/>
+  <rect x="960" y="574" width="110" height="10" fill="#A8854F"/>
+  <rect x="964" y="530" width="102" height="44" rx="6" fill="#D4B37A"/>
+  <rect x="964" y="530" width="102" height="10" fill="#A8854F"/>
+  <path d="M968 530 q47 -24 94 0z" fill="#B8955C"/>
+
+  <!-- chopping block, cleaver, scallions -->
+  <ellipse cx="420" cy="612" rx="110" ry="16" fill="#5C3020"/>
+  <rect x="310" y="588" width="220" height="24" fill="#8A5A36"/>
+  <ellipse cx="420" cy="588" rx="110" ry="16" fill="#B07C4E"/>
+  <g fill="none" stroke="#8A5A36" stroke-width="2">
+    <ellipse cx="420" cy="588" rx="70" ry="10"/>
+    <ellipse cx="420" cy="588" rx="34" ry="5"/>
+  </g>
+  <path d="M380 576 h70 l10 -6 v-10 l-80 4z" fill="#C9CED6"/>
+  <rect x="460" y="562" width="44" height="12" rx="4" fill="#3A1F16"/>
+  <g fill="#6FA05A">
+    <rect x="340" y="574" width="28" height="8" rx="4"/>
+    <rect x="346" y="566" width="24" height="7" rx="3"/>
+  </g>
+</svg>
