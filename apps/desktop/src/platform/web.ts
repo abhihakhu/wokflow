@@ -1,59 +1,52 @@
-import type { Task } from '@wokflow/core';
+import type { Recipe, Task } from '@wokflow/core';
 import { createMemoryStore, type Platform } from '@wokflow/data';
+import { visibility, webNotify } from './visibility';
 
 const now = new Date().toISOString();
 
-/** Demo data so the dev build has something to cook. Replaced by SQLite in milestone 2. */
-const seedTasks: Task[] = [
+const demoRecipe: Recipe = {
+  id: 'demo-exam',
+  title: 'ECE 264 exam review',
+  kind: 'signature',
+  createdAt: now,
+  updatedAt: now,
+};
+
+const step = (id: string, title: string, stepIndex: number, done = false): Task => ({
+  id,
+  title,
+  estSessions: 1,
+  tags: ['ece264'],
+  recipeId: demoRecipe.id,
+  stepIndex,
+  status: done ? 'done' : 'todo',
+  createdAt: now,
+  updatedAt: now,
+});
+
+/** Demo data for the browser build. The desktop app (Tauri) starts empty and persists to SQLite. */
+const demoTasks: Task[] = [
+  step('demo-1', 'Pointers & addresses', 0, true),
+  step('demo-2', 'Structs & malloc', 1, true),
+  step('demo-3', 'Linked lists: insert & free', 2),
+  step('demo-4', 'Recursion on lists', 3),
+  step('demo-5', 'Practice exam (boss round)', 4),
   {
-    id: 'demo-1',
-    title: 'Linked lists: insert & free',
+    id: 'demo-6',
+    title: 'Lab 9 write-up',
     estSessions: 2,
-    tags: ['ece264'],
-    recipeId: 'exam-review',
-    stepIndex: 2,
-    status: 'todo',
-    createdAt: now,
-    updatedAt: now,
-  },
-  {
-    id: 'demo-2',
-    title: 'Recursion on lists',
-    estSessions: 1,
-    tags: ['ece264'],
-    recipeId: 'exam-review',
-    stepIndex: 3,
+    tags: ['lab'],
     status: 'todo',
     createdAt: now,
     updatedAt: now,
   },
 ];
 
-/**
- * Browser/Tauri-webview platform: in-memory store, Web Notifications,
- * and the Page Visibility API for leave detection.
- */
+/** Browser platform: in-memory demo data (resets on reload). */
 export function createWebPlatform(): Platform {
   return {
-    store: createMemoryStore({ tasks: seedTasks }),
-    async notify(title, body) {
-      if (!('Notification' in window)) return;
-      if (Notification.permission === 'default') await Notification.requestPermission();
-      if (Notification.permission === 'granted') new Notification(title, { body });
-    },
-    onAppHidden(cb) {
-      const handler = () => {
-        if (document.visibilityState === 'hidden') cb();
-      };
-      document.addEventListener('visibilitychange', handler);
-      return () => document.removeEventListener('visibilitychange', handler);
-    },
-    onAppVisible(cb) {
-      const handler = () => {
-        if (document.visibilityState === 'visible') cb();
-      };
-      document.addEventListener('visibilitychange', handler);
-      return () => document.removeEventListener('visibilitychange', handler);
-    },
+    store: createMemoryStore({ tasks: demoTasks, recipes: [demoRecipe] }),
+    notify: webNotify,
+    ...visibility,
   };
 }
