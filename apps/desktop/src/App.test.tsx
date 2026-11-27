@@ -145,4 +145,38 @@ describe('WokFlow desktop app', () => {
     const [session] = await store.sessions.list();
     expect(session).toMatchObject({ phase: 'served', focusRating: 4, coinsEarned: 18 });
   });
+
+  it('saves settings and uses them for the next session', async () => {
+    const { store, user } = setup();
+
+    await user.click(await screen.findByRole('button', { name: 'Settings' }));
+    expect(screen.getByRole('radio', { name: /Ember/ })).toHaveProperty('checked', true);
+
+    const grace = screen.getByLabelText(/Away grace period/);
+    await user.clear(grace);
+    await user.type(grace, '999');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/Grace period must be/);
+
+    await user.clear(grace);
+    await user.type(grace, '60');
+    const minutes = screen.getByLabelText(/Default session/);
+    await user.clear(minutes);
+    await user.type(minutes, '50');
+    await user.click(screen.getByRole('button', { name: 'Calm (still)' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await screen.findByRole('heading', { name: 'Today’s menu' });
+    expect((await store.settings.get('settings'))?.values).toMatchObject({
+      awayGraceSec: 60,
+      defaultSimmerMin: 50,
+      motion: 'reduce',
+    });
+
+    await user.click(screen.getByRole('button', { name: '+ Task' }));
+    await user.type(screen.getByLabelText('Title'), 'Problem set');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(await screen.findByRole('button', { name: 'Prep' }));
+    expect(screen.getByRole('button', { name: '50m' }).getAttribute('aria-pressed')).toBe('true');
+  });
 });

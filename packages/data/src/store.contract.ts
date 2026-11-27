@@ -95,6 +95,8 @@ export function describeStoreContract(name: string, makeStore: () => Promise<Wok
       expect((await store.inventory.get('t1'))?.qty).toBe(5);
       expect(await store.sessions.list()).toEqual([]);
       expect(await store.parkingLot.list()).toEqual([]);
+      expect(await store.placements.list()).toEqual([]);
+      expect(await store.settings.list()).toEqual([]);
     });
   });
 }

@@ -18,6 +18,8 @@ import {
 import { pickLine } from '@wokflow/companion';
 import type { Platform } from '@wokflow/data';
 import { selectPack } from './packs';
+import { useSettings } from './state/useSettings';
+import { SettingsView } from './views/SettingsView';
 import { useKitchen } from './state/useKitchen';
 import { Menu } from './views/Menu';
 import { RecipeEditor } from './views/RecipeEditor';
@@ -30,17 +32,20 @@ const KitchenScene = lazy(() =>
   import('./scene/KitchenScene').then((m) => ({ default: m.KitchenScene })),
 );
 
-const companion = selectPack();
-const { pack } = companion;
-
 type Panel =
   | { view: 'menu' }
   | { view: 'prep'; task: Task }
   | { view: 'editTask'; task: Task | undefined }
-  | { view: 'editRecipe'; recipe: Recipe | undefined };
+  | { view: 'editRecipe'; recipe: Recipe | undefined }
+  | { view: 'settings' };
 
 export function App({ platform }: { platform: Platform }) {
   const kitchen = useKitchen(platform.store);
+  const settingsState = useSettings(platform.store);
+  const { settings } = settingsState;
+  const graceMs = settings.awayGraceSec * 1000;
+  const companion = useMemo(() => selectPack(settings.companionPack), [settings.companionPack]);
+  const { pack } = companion;
   const [panel, setPanel] = useState<Panel>({ view: 'menu' });
   const [session, setSession] = useState<Session | undefined>();
   const [flash, setFlash] = useState<string>();
@@ -63,15 +68,17 @@ export function App({ platform }: { platform: Platform }) {
   useEffect(() => {
     if (!simmering) return;
     const offHidden = platform.onAppHidden(() => setSession((s) => s && markAway(s, Date.now())));
-    const offVisible = platform.onAppVisible(() => setSession((s) => s && markBack(s, Date.now())));
+    const offVisible = platform.onAppVisible(() =>
+      setSession((s) => s && markBack(s, Date.now(), graceMs)),
+    );
     return () => {
       offHidden();
       offVisible();
     };
-  }, [platform, simmering]);
+  }, [platform, simmering, graceMs]);
 
   const companionState = companionStateFor(session);
-  const line = useMemo(() => pickLine(pack, companionState), [companionState]);
+  const line = useMemo(() => pickLine(pack, companionState), [pack, companionState]);
   const activeTask = kitchen.tasks.find((t) => t.id === session?.taskId);
   const backToMenu = () => setPanel({ view: 'menu' });
 
@@ -97,13 +104,35 @@ export function App({ platform }: { platform: Platform }) {
           {kitchen.wallet.rareDecor > 0 && (
             <span className="purse">✦ {kitchen.wallet.rareDecor} rare decor</span>
           )}
+          <button
+            type="button"
+            className="icon-btn on-wood"
+            aria-label="Settings"
+            disabled={Boolean(session)}
+            onClick={() => setPanel({ view: 'settings' })}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+            </svg>
+          </button>
         </div>
       </header>
 
       <main className="layout">
         <section className="scene" aria-label="Kitchen">
           <Suspense fallback={null}>
-            <KitchenScene state={companionState} companion={companion} />
+            {settingsState.loaded && (
+              <KitchenScene state={companionState} companion={companion} motion={settings.motion} />
+            )}
           </Suspense>
           <p className="bubble" aria-live="polite">
             <span className="sr-only">{pack.name} says: </span>
@@ -126,9 +155,9 @@ export function App({ platform }: { platform: Platform }) {
           {session && (session.phase === 'simmer' || session.phase === 'paused') && (
             <Simmer
               session={session}
-              onPause={() => setSession(pauseSimmer(session, Date.now()))}
+              onPause={() => setSession(pauseSimmer(session, Date.now(), graceMs))}
               onResume={() => setSession(resumeSimmer(session, Date.now()))}
-              onFinish={() => setSession(finishSimmer(session, Date.now()))}
+              onFinish={() => setSession(finishSimmer(session, Date.now(), graceMs))}
               onPark={(text) =>
                 void platform.store.parkingLot.put({
                   id: crypto.randomUUID(),
@@ -180,6 +209,7 @@ export function App({ platform }: { platform: Platform }) {
           {!session && panel.view === 'prep' && (
             <Prep
               task={panel.task}
+              defaultMin={settings.defaultSimmerMin}
               onCancel={backToMenu}
               onStart={(input) => {
                 const t = Date.now();
@@ -210,6 +240,9 @@ export function App({ platform }: { platform: Platform }) {
               recipe={panel.recipe}
               onDone={backToMenu}
             />
+          )}
+          {!session && panel.view === 'settings' && settingsState.loaded && (
+            <SettingsView state={settingsState} onDone={backToMenu} />
           )}
         </aside>
       </main>

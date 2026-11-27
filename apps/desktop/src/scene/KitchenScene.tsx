@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CompanionState } from '@wokflow/core';
+import { shouldReduceMotion, type CompanionState, type MotionPreference } from '@wokflow/core';
 import { mountKitchen, type KitchenScene as Scene } from '@wokflow/scene';
 import back from '@wokflow/scene/assets/kitchen-back.svg?url';
 import front from '@wokflow/scene/assets/kitchen-front.svg?url';
@@ -27,14 +27,16 @@ function usePrefersReducedMotion(): boolean {
 export function KitchenScene({
   state,
   companion,
+  motion = 'system',
 }: {
   state: CompanionState;
   companion: LoadedPack;
+  motion?: MotionPreference;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<Scene | undefined>(undefined);
   const latest = useRef(state);
-  const reduced = usePrefersReducedMotion();
+  const reduced = shouldReduceMotion(motion, usePrefersReducedMotion());
   const reducedRef = useRef(reduced);
   const [failed, setFailed] = useState(false);
 
