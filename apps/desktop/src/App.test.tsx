@@ -2,6 +2,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Reminder } from '@wokflow/core';
 import { createMemoryStore, type Platform, type StoreSeed } from '@wokflow/data';
 import { App } from './App';
 
@@ -10,15 +11,17 @@ vi.mock('./scene/KitchenScene', () => ({ KitchenScene: () => null }));
 
 function setup(seed: StoreSeed = {}) {
   const store = createMemoryStore(seed);
+  const scheduleReminders = vi.fn(async (_reminders: readonly Reminder[]) => {});
   const platform: Platform = {
     store,
     notify: async () => {},
+    scheduleReminders,
     onAppHidden: () => () => {},
     onAppVisible: () => () => {},
   };
   const user = userEvent.setup();
   render(<App platform={platform} />);
-  return { store, user };
+  return { store, user, scheduleReminders };
 }
 
 afterEach(cleanup);
@@ -209,5 +212,55 @@ describe('WokFlow desktop app', () => {
     const tea = screen.getByText('Clay tea set').closest('li')!;
     await user.click(within(tea).getByRole('button', { name: 'Buy' }));
     expect(await wallet.findByText(/0 coins/)).toBeTruthy();
+  });
+
+  it('schedules "order up" for a running session and due-date reminders', async () => {
+    const { user, scheduleReminders } = setup();
+    const lastPlan = () => scheduleReminders.mock.calls.at(-1)?.[0] ?? [];
+
+    await user.click(await screen.findByRole('button', { name: '+ Task' }));
+    await user.type(screen.getByLabelText('Title'), 'Lab report');
+    const tomorrowPlus = new Date();
+    tomorrowPlus.setDate(tomorrowPlus.getDate() + 3);
+    const due = `${tomorrowPlus.getFullYear()}-${String(tomorrowPlus.getMonth() + 1).padStart(2, '0')}-${String(tomorrowPlus.getDate()).padStart(2, '0')}`;
+    await user.type(screen.getByLabelText('Due'), due);
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(lastPlan().map((r) => r.title)).toContain('Due tomorrow: Lab report'),
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Prep' }));
+    await user.type(screen.getByLabelText('Smallest first step'), 'Outline');
+    await user.type(screen.getByLabelText(/I want to understand/), 'The method');
+    await user.click(screen.getByRole('button', { name: 'Fire up the wok' }));
+    await waitFor(() => expect(lastPlan()[0]).toMatchObject({ kind: 'pot', title: 'Order up!' }));
+    const pot = lastPlan()[0]!;
+    expect(pot.at - Date.now()).toBeGreaterThan(24 * 60_000);
+
+    await user.click(screen.getByRole('button', { name: 'Pause' }));
+    await waitFor(() => expect(lastPlan().some((r) => r.kind === 'pot')).toBe(false));
+  });
+
+  it('saves a daily nudge and turns it off', async () => {
+    const { store, user, scheduleReminders } = setup();
+    await user.click(await screen.findByRole('button', { name: 'Settings' }));
+    await user.type(screen.getByLabelText('Daily nudge to start cooking'), '18:30');
+    await user.click(screen.getByLabelText(/day before things are due/));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByRole('heading', { name: 'Today’s menu' });
+    expect((await store.settings.get('settings'))?.values).toMatchObject({
+      dailyNudge: '18:30',
+      dueReminders: false,
+    });
+    await waitFor(() =>
+      expect(scheduleReminders.mock.calls.at(-1)?.[0].every((r) => r.kind === 'daily')).toBe(true),
+    );
+    expect(scheduleReminders.mock.calls.at(-1)?.[0].length).toBeGreaterThanOrEqual(7);
+
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: 'Turn off' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByRole('heading', { name: 'Today’s menu' });
+    expect((await store.settings.get('settings'))?.values).toMatchObject({ dailyNudge: '' });
   });
 });

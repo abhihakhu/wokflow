@@ -45,3 +45,28 @@ jobs:
       - name: cargo check
         working-directory: apps/desktop/src-tauri
         run: cargo check
+
+  android:
+    name: Android APK builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: pnpm install --frozen-lockfile
+      - name: Build web app and sync into the Android project
+        run: pnpm --filter @wokflow/mobile sync
+      - name: Assemble debug APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wokflow-android-debug
+          path: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk

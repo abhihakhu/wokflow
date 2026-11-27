@@ -4,7 +4,13 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**', 'apps/desktop/src-tauri/**'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+      'apps/desktop/src-tauri/**',
+      'apps/mobile/android/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

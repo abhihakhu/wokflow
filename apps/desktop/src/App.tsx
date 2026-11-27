@@ -7,6 +7,8 @@ import {
   markAway,
   markBack,
   pauseSimmer,
+  planReminders,
+  potReminder,
   remainingMs,
   resumeSimmer,
   serveSession,
@@ -78,6 +80,35 @@ export function App({ platform }: { platform: Platform }) {
       offVisible();
     };
   }, [platform, simmering, graceMs]);
+
+  // Reminders: due dates, the daily nudge, and "order up" for a running session.
+  // Recomputed when anything they depend on changes; each call replaces the scheduled set.
+  const reminderKey = JSON.stringify([
+    kitchen.tasks.map((t) => [t.id, t.status, t.dueAt, t.recipeId]),
+    kitchen.recipes.map((r) => [r.id, r.dueAt, r.title]),
+    settings.dueReminders,
+    settings.dailyNudge,
+    session?.id,
+    session?.phase,
+    session?.runningSince,
+    session?.awaySince,
+    session?.focusedMs,
+  ]);
+  useEffect(() => {
+    if (!kitchen.loaded || !settingsState.loaded) return;
+    const at = Date.now();
+    const plan = planReminders(kitchen.tasks, kitchen.recipes, settings, at);
+    const pot = potReminder(
+      session,
+      kitchen.tasks.find((t) => t.id === session?.taskId)?.title,
+      at,
+    );
+    platform
+      .scheduleReminders(pot ? [pot, ...plan] : plan)
+      .catch((err: unknown) => console.warn('[wokflow] could not schedule reminders:', err));
+    // reminderKey captures every input; the objects themselves change identity every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platform, reminderKey, kitchen.loaded, settingsState.loaded]);
 
   const companionState = companionStateFor(session);
   const line = useMemo(() => pickLine(pack, companionState), [pack, companionState]);

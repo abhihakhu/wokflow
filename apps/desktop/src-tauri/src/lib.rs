@@ -4,6 +4,7 @@ pub fn run() {
     // SQLite via sqlx. The database file lives in the app's config dir;
     // the schema is created and migrated from TypeScript (@wokflow/data).
     .plugin(tauri_plugin_sql::Builder::default().build())
+    .plugin(tauri_plugin_notification::init())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(

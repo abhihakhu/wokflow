@@ -1,5 +1,6 @@
 import type { Recipe, Task } from '@wokflow/core';
 import { createMemoryStore, type Platform } from '@wokflow/data';
+import { createTimeoutScheduler } from './scheduler';
 import { visibility, webNotify } from './visibility';
 
 const now = new Date().toISOString();
@@ -47,6 +48,7 @@ export function createWebPlatform(): Platform {
   return {
     store: createMemoryStore({ tasks: demoTasks, recipes: [demoRecipe] }),
     notify: webNotify,
+    scheduleReminders: createTimeoutScheduler(webNotify),
     ...visibility,
   };
 }
