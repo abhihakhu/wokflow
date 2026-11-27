@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { DECOR_CATALOG } from '@wokflow/core';
+import { DECOR_ART, companionBounds, decorBounds, insideDesign, overlaps } from './decor.js';
 import { FIRE, flameShapes } from './flame.js';
 import { COMPANION_SPOT, DESIGN, coverFit } from './layout.js';
 import { SCENE_PARAMS, approach } from './params.js';
@@ -172,5 +174,57 @@ describe('sprite sheets', () => {
       y: COMPANION_SPOT.y,
       scale: COMPANION_SPOT.maxHeight / 320,
     });
+  });
+});
+
+describe('decor placement', () => {
+  const entries = Object.entries(DECOR_ART);
+
+  it('has art for every item in the shop', () => {
+    for (const item of DECOR_CATALOG) expect(DECOR_ART[item.id], item.id).toBeDefined();
+  });
+
+  it('keeps every item inside the kitchen, clear of each other and the companion', () => {
+    const companion = companionBounds();
+    for (const [id, art] of entries) {
+      const box = decorBounds(art);
+      expect(insideDesign(box), `${id} inside`).toBe(true);
+      expect(overlaps(box, companion), `${id} vs companion`).toBe(false);
+    }
+    for (let i = 0; i < entries.length; i++) {
+      for (let j = i + 1; j < entries.length; j++) {
+        const [a, artA] = entries[i]!;
+        const [b, artB] = entries[j]!;
+        expect(overlaps(decorBounds(artA), decorBounds(artB)), `${a} vs ${b}`).toBe(false);
+      }
+    }
+  });
+
+  it('stands counter items on the counter', () => {
+    for (const [id, art] of entries) {
+      if (art.layer === 'counter') expect(decorBounds(art).bottom, id).toBe(624);
+    }
+  });
+
+  it('computes bounds from the anchor', () => {
+    expect(
+      decorBounds({
+        file: 'x',
+        width: 100,
+        height: 50,
+        x: 200,
+        y: 100,
+        anchorX: 0.5,
+        anchorY: 1,
+        scale: 2,
+        layer: 'counter',
+      }),
+    ).toEqual({ left: 100, top: 0, right: 300, bottom: 100 });
+    expect(
+      overlaps(
+        { left: 0, top: 0, right: 10, bottom: 10 },
+        { left: 10, top: 0, right: 20, bottom: 10 },
+      ),
+    ).toBe(false);
   });
 });

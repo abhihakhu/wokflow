@@ -5,6 +5,7 @@ import back from '@wokflow/scene/assets/kitchen-back.svg?url';
 import front from '@wokflow/scene/assets/kitchen-front.svg?url';
 import glow from '@wokflow/scene/assets/glow.svg?url';
 import lantern from '@wokflow/scene/assets/lantern.svg?url';
+import { decorFileUrl } from '../decorArt';
 import type { LoadedPack } from '../packs';
 
 const ASSETS = { back, front, glow, lantern };
@@ -28,10 +29,13 @@ export function KitchenScene({
   state,
   companion,
   motion = 'system',
+  decor = [],
 }: {
   state: CompanionState;
   companion: LoadedPack;
   motion?: MotionPreference;
+  /** Decor item ids to show. */
+  decor?: readonly string[];
 }) {
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<Scene | undefined>(undefined);
@@ -39,6 +43,13 @@ export function KitchenScene({
   const reduced = shouldReduceMotion(motion, usePrefersReducedMotion());
   const reducedRef = useRef(reduced);
   const [failed, setFailed] = useState(false);
+  const decorKey = decor.join(',');
+  const latestDecor = useRef(decor);
+
+  useEffect(() => {
+    latestDecor.current = decorKey ? decorKey.split(',') : [];
+    scene.current?.setDecor(latestDecor.current);
+  }, [decorKey]);
 
   useEffect(() => {
     latest.current = state;
@@ -58,6 +69,8 @@ export function KitchenScene({
       assets: ASSETS,
       pack: companion.pack,
       resolvePackFile: companion.resolveFile,
+      resolveDecorFile: decorFileUrl,
+      decor: [...latestDecor.current],
       initialState: latest.current,
       reducedMotion: reducedRef.current,
     }).then(
