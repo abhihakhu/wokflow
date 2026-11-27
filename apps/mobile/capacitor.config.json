@@ -1,0 +1,17 @@
+{
+  "appId": "dev.wokflow.app",
+  "appName": "WokFlow",
+  "webDir": "../desktop/dist",
+  "android": {
+    "backgroundColor": "#2A160F"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_wokflow",
+      "iconColor": "#8E2A22"
+    },
+    "CapacitorSQLite": {
+      "androidIsEncryption": false
+    }
+  }
+}

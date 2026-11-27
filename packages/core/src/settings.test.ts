@@ -9,6 +9,8 @@ describe('settings', () => {
       defaultSimmerMin: 25,
       awayGraceSec: 30,
       motion: 'system',
+      dueReminders: true,
+      dailyNudge: '',
     });
     expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(true);
   });
@@ -23,9 +25,16 @@ describe('settings', () => {
         defaultSimmerMin: 45,
         awayGraceSec: -3,
         motion: 'sideways',
+        dailyNudge: '18:30',
+        dueReminders: 'maybe',
         legacyField: true,
       }),
-    ).toEqual({ ...DEFAULT_SETTINGS, companionPack: 'xiangling', defaultSimmerMin: 45 });
+    ).toEqual({
+      ...DEFAULT_SETTINGS,
+      companionPack: 'xiangling',
+      defaultSimmerMin: 45,
+      dailyNudge: '18:30',
+    });
   });
 
   it('validates updates and names the bad field', () => {
@@ -37,6 +46,8 @@ describe('settings', () => {
       [{ defaultSimmerMin: 30.5 }, 'defaultSimmerMin'],
       [{ awayGraceSec: 601 }, 'awayGraceSec'],
       [{ motion: 'fast' as never }, 'motion'],
+      [{ dueReminders: 'yes' as never }, 'dueReminders'],
+      [{ dailyNudge: '6pm' }, 'dailyNudge'],
     ];
     for (const [patch, field] of cases) {
       try {

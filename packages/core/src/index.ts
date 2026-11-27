@@ -7,3 +7,4 @@ export * from './tasks.js';
 export * from './wallet.js';
 export * from './settings.js';
 export * from './decor.js';
+export * from './reminders.js';

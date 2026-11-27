@@ -26,7 +26,8 @@ coins = focused minutes + 10 (reflection with ≥ 2 real sentences) + focus rati
 ```
 wokflow/
 ├─ apps/
-│  └─ desktop/          # React + Vite UI (views/, state/), Tauri 2 shell (src-tauri/)
+│  ├─ desktop/          # React + Vite UI (views/, state/), Tauri 2 shell (src-tauri/)
+│  └─ mobile/           # Capacitor Android shell around the same web build
 ├─ packages/
 │  ├─ core/             # pure domain logic: sessions, rewards, recipes (no I/O)
 │  ├─ data/             # Store / Platform interfaces, in-memory + SQLite adapters, migrations
@@ -44,11 +45,11 @@ wokflow/
 - **The scene is mostly pure functions.** Layout, particles, flames and sprite-sheet slicing are unit-tested; the PixiJS layer just draws them. It honors `prefers-reduced-motion` and loads lazily after the menu.
 - **Companions are packs.** Drop a folder in `packs/` with a `pack.json` and sprite sheets. Only the default pack is committed; see [packs/README.md](packs/README.md).
 
-Decisions: [stack](docs/adr/0001-monorepo-and-stack.md) · [character packs](docs/adr/0002-character-packs.md) · [leave detection](docs/adr/0003-leave-detection.md) · [visual direction](docs/adr/0004-visual-direction.md) · [SQLite storage](docs/adr/0005-sqlite-storage.md) · [kitchen scene](docs/adr/0006-kitchen-scene.md)
+Decisions: [stack](docs/adr/0001-monorepo-and-stack.md) · [character packs](docs/adr/0002-character-packs.md) · [leave detection](docs/adr/0003-leave-detection.md) · [visual direction](docs/adr/0004-visual-direction.md) · [SQLite storage](docs/adr/0005-sqlite-storage.md) · [kitchen scene](docs/adr/0006-kitchen-scene.md) · [Android and reminders](docs/adr/0007-android-and-reminders.md)
 
 ## Download
 
-Installers for macOS, Windows and Linux are attached to each [release](https://github.com/abhihakhu/wokflow/releases). The app isn't code-signed yet: on macOS, right-click WokFlow in Applications and choose **Open** the first time; on Windows, choose **More info → Run anyway**.
+Installers for macOS, Windows and Linux, and an Android APK, are attached to each [release](https://github.com/abhihakhu/wokflow/releases). The app isn't code-signed yet: on macOS, right-click WokFlow in Applications and choose **Open** the first time; on Windows, choose **More info → Run anyway**.
 
 ## Getting started
 
@@ -62,6 +63,18 @@ pnpm coverage     # with coverage thresholds (80%)
 pnpm lint && pnpm typecheck
 pnpm pack:default # redraw Ember's sprite sheets (scripts/build-default-pack.mjs)
 ```
+
+### Android (Capacitor)
+
+Requires Android Studio (or the Android SDK) and JDK 21.
+
+```bash
+pnpm --filter @wokflow/mobile sync   # build the web app and copy it into android/
+pnpm --filter @wokflow/mobile open   # open in Android Studio, then Run on your phone
+pnpm --filter @wokflow/mobile apk    # or build a debug APK from the command line
+```
+
+The APK lands in `apps/mobile/android/app/build/outputs/apk/debug/`. CI also builds one on every push (see the run's artifacts).
 
 ### Desktop app (Tauri)
 
@@ -80,7 +93,7 @@ pnpm tauri build  # installer in src-tauri/target/release/bundle
 - [x] **M3** PixiJS kitchen scene + default companion art (README GIF still to record)
 - [x] **M4** Settings: in-app companion picker, default session length, away grace period, motion preference
 - [x] **M5** Market with kitchen decor, app icon, release workflow → **v0.1**
-- [ ] **M6** Android (Capacitor) + local notifications → v0.2
+- [x] **M6** Android app (Capacitor) with OS-scheduled reminders: due dates, daily nudge, "order up"
 - [ ] Later: sync, Harbor Map, iCal deadline import, LLM-generated recipes and quizzes
 
 ## Releasing

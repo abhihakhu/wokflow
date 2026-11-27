@@ -1,6 +1,7 @@
 import type {
   InventoryItem,
   ParkingLotItem,
+  Reminder,
   Placement,
   Recipe,
   Session,
@@ -38,6 +39,11 @@ export interface WokflowStore {
 export interface Platform {
   store: WokflowStore;
   notify(title: string, body: string): Promise<void>;
+  /**
+   * Replace every scheduled reminder with this set. Desktop fires them while the app is
+   * running; Android hands them to the OS so they fire even when the app is closed.
+   */
+  scheduleReminders(reminders: readonly Reminder[]): Promise<void>;
   /** Subscribe to the app being hidden/backgrounded. Returns an unsubscribe function. */
   onAppHidden(cb: () => void): () => void;
   onAppVisible(cb: () => void): () => void;

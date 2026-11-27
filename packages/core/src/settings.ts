@@ -1,3 +1,4 @@
+import { isValidNudgeTime } from './reminders.js';
 import { DEFAULT_AWAY_GRACE_MS, MAX_PLANNED_MIN, MIN_PLANNED_MIN } from './session.js';
 import { ValidationError } from './validation.js';
 
@@ -12,6 +13,10 @@ export interface Settings {
   awayGraceSec: number;
   /** Animation: follow the OS setting, or force reduced / full motion. */
   motion: MotionPreference;
+  /** Notify the day before tasks and recipes are due. */
+  dueReminders: boolean;
+  /** "HH:MM" for a daily nudge to start cooking, or "" for none. */
+  dailyNudge: string;
 }
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
@@ -19,6 +24,8 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   defaultSimmerMin: 25,
   awayGraceSec: DEFAULT_AWAY_GRACE_MS / 1000,
   motion: 'system',
+  dueReminders: true,
+  dailyNudge: '',
 });
 
 export const AWAY_GRACE_RANGE = { min: 0, max: 600 } as const;
@@ -45,6 +52,12 @@ function check(settings: Settings): Settings {
   }
   if (!MOTIONS.includes(settings.motion)) {
     throw new ValidationError('Pick a motion setting.', 'motion');
+  }
+  if (typeof settings.dueReminders !== 'boolean') {
+    throw new ValidationError('Due reminders must be on or off.', 'dueReminders');
+  }
+  if (typeof settings.dailyNudge !== 'string' || !isValidNudgeTime(settings.dailyNudge)) {
+    throw new ValidationError('Use a time like 18:30, or leave it empty.', 'dailyNudge');
   }
   return settings;
 }

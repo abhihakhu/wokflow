@@ -22,6 +22,8 @@ export function SettingsView({ state, onDone }: { state: SettingsState; onDone()
   const [defaultSimmerMin, setDefaultSimmerMin] = useState(settings.defaultSimmerMin);
   const [awayGraceSec, setAwayGraceSec] = useState(settings.awayGraceSec);
   const [motion, setMotion] = useState(settings.motion);
+  const [dueReminders, setDueReminders] = useState(settings.dueReminders);
+  const [dailyNudge, setDailyNudge] = useState(settings.dailyNudge);
   const [error, setError] = useState<FormError>();
   const invalid = (field: string) => (error?.field === field ? true : undefined);
 
@@ -32,7 +34,7 @@ export function SettingsView({ state, onDone }: { state: SettingsState; onDone()
       onSubmit={(e) => {
         e.preventDefault();
         state
-          .save({ companionPack, defaultSimmerMin, awayGraceSec, motion })
+          .save({ companionPack, defaultSimmerMin, awayGraceSec, motion, dueReminders, dailyNudge })
           .then(onDone, (err: unknown) => setError(toFormError(err)));
       }}
     >
@@ -123,6 +125,40 @@ export function SettingsView({ state, onDone }: { state: SettingsState; onDone()
             {option.label}
           </button>
         ))}
+      </fieldset>
+
+      <fieldset className="stack tight plain">
+        <legend>
+          <h3>Reminders</h3>
+        </legend>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={dueReminders}
+            onChange={(e) => setDueReminders(e.target.checked)}
+          />
+          Remind me the day before things are due
+        </label>
+        <div className="row">
+          <label className="grow">
+            Daily nudge to start cooking
+            <input
+              type="time"
+              value={dailyNudge}
+              onChange={(e) => setDailyNudge(e.target.value)}
+              aria-invalid={invalid('dailyNudge')}
+            />
+          </label>
+          {dailyNudge && (
+            <button type="button" className="link align-end" onClick={() => setDailyNudge('')}>
+              Turn off
+            </button>
+          )}
+        </div>
+        <p className="muted">
+          On Android, reminders arrive even when WokFlow is closed. On desktop they arrive while
+          it’s running.
+        </p>
       </fieldset>
 
       <div className="row">

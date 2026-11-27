@@ -11,7 +11,12 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.3",
+    "@capacitor/local-notifications": "^8.3.1",
     "@tauri-apps/api": "^2.12.5",
+    "@tauri-apps/plugin-notification": "^2.8.1",
     "@tauri-apps/plugin-sql": "^2.6.0",
     "@wokflow/companion": "workspace:*",
     "@wokflow/core": "workspace:*",
