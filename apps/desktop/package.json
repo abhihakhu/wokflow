@@ -16,6 +16,7 @@
     "@wokflow/companion": "workspace:*",
     "@wokflow/core": "workspace:*",
     "@wokflow/data": "workspace:*",
+    "@wokflow/scene": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

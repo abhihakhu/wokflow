@@ -54,4 +54,19 @@ Validated by `@wokflow/companion` (`parsePack`). Every pack must animate four st
 4. Pack each sequence into a horizontal strip (e.g. `ffmpeg -i frame_%03d.png -vf tile=16x1 cooking.png` for 16 frames, or TexturePacker).
 5. Put the strips and a `pack.json` in `packs/<id>/`.
 
-The `default` pack currently ships placeholder single-frame entries; its real art lands in milestone 3.
+## Using your pack
+
+Packs are bundled at build time, so a folder in `packs/` is all it takes. Pick one with an environment variable:
+
+```bash
+cd apps/desktop
+VITE_COMPANION_PACK=xiangling pnpm tauri dev
+```
+
+A missing or invalid pack falls back to the default and logs why in the dev console. Frames are scaled so their height fits the companion spot on the counter (420 px of the 1600×1000 kitchen); leave a little transparent headroom in each frame for jumps and effects.
+
+## The default pack
+
+Ember's sprite sheets are drawn in code by `scripts/build-default-pack.mjs`. Change a pose there and run `pnpm pack:default` to regenerate the PNGs, `pack.json` and the preview in `docs/images/`.
+
+![Ember's animations: idle, cooking, notice, cheer](../docs/images/ember-preview.png)
