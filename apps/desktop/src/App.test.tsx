@@ -2,14 +2,14 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createMemoryStore, type Platform } from '@wokflow/data';
+import { createMemoryStore, type Platform, type StoreSeed } from '@wokflow/data';
 import { App } from './App';
 
 // jsdom has no WebGL; the PixiJS scene is covered by @wokflow/scene's unit tests.
 vi.mock('./scene/KitchenScene', () => ({ KitchenScene: () => null }));
 
-function setup() {
-  const store = createMemoryStore();
+function setup(seed: StoreSeed = {}) {
+  const store = createMemoryStore(seed);
   const platform: Platform = {
     store,
     notify: async () => {},
@@ -178,5 +178,36 @@ describe('WokFlow desktop app', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     await user.click(await screen.findByRole('button', { name: 'Prep' }));
     expect(screen.getByRole('button', { name: '50m' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('buys decor in the market, then hides it from the kitchen', async () => {
+    const now = '2026-11-27T00:00:00.000Z';
+    const { store, user } = setup({ inventory: [{ id: 'coins', qty: 100, updatedAt: now }] });
+
+    await user.click(await screen.findByRole('button', { name: 'Market' }));
+    const fan = screen.getByText('Paper fan').closest('li')!;
+    const bonsai = screen.getByText('Bonsai pine').closest('li')!;
+    expect(within(bonsai).getByRole('button', { name: 'Buy' })).toHaveProperty('disabled', true);
+    expect(within(bonsai).getByText('Needs 2 more ingredients.')).toBeTruthy();
+
+    await user.click(within(fan).getByRole('button', { name: 'Buy' }));
+    expect(await screen.findByText('The Paper fan is in your kitchen.')).toBeTruthy();
+    const wallet = within(screen.getByRole('group', { name: 'Wallet' }));
+    expect(wallet.getByText(/60 coins/)).toBeTruthy();
+    expect((await store.inventory.get('decor:paper-fan'))?.qty).toBe(1);
+
+    const shown = within(screen.getByText('Paper fan').closest('li')!).getByRole('checkbox', {
+      name: 'Shown in the kitchen',
+    });
+    expect(shown).toHaveProperty('checked', true);
+    await user.click(shown);
+    await waitFor(async () =>
+      expect((await store.placements.get('paper-fan'))?.visible).toBe(false),
+    );
+
+    // The tea set costs 60: exactly what is left.
+    const tea = screen.getByText('Clay tea set').closest('li')!;
+    await user.click(within(tea).getByRole('button', { name: 'Buy' }));
+    expect(await wallet.findByText(/0 coins/)).toBeTruthy();
   });
 });

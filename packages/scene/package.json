@@ -6,6 +6,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./decor": "./src/decor.ts",
     "./assets/*": "./assets/*"
   },
   "scripts": {

@@ -7,6 +7,8 @@ import {
   createTask,
   markInProgress,
   nextStepIndex,
+  purchase,
+  visibleDecor,
   readWallet,
   recipeSteps,
   reopenTask,
@@ -15,6 +17,7 @@ import {
   updateRecipe,
   updateTask,
   type InventoryItem,
+  type Placement,
   type Recipe,
   type RecipeKind,
   type StepReward,
@@ -48,6 +51,13 @@ export interface Kitchen {
   tasks: Task[];
   recipes: Recipe[];
   wallet: Wallet;
+  inventory: InventoryItem[];
+  placements: Placement[];
+  /** Owned, non-hidden decor ids to draw in the kitchen. */
+  decor: string[];
+  /** Validate and buy a shop item. Throws ValidationError if owned or unaffordable. */
+  buyDecor(id: string): Promise<void>;
+  setDecorVisible(id: string, visible: boolean): Promise<void>;
   saveTask(form: TaskForm, existing?: Task): Promise<Task>;
   deleteTask(task: Task): Promise<void>;
   /** Complete or reopen. Returns the reward when completing a recipe step. */
@@ -65,15 +75,17 @@ interface Snapshot {
   tasks: Task[];
   recipes: Recipe[];
   inventory: InventoryItem[];
+  placements: Placement[];
 }
 
 async function loadSnapshot(store: WokflowStore): Promise<Snapshot> {
-  const [tasks, recipes, inventory] = await Promise.all([
+  const [tasks, recipes, inventory, placements] = await Promise.all([
     store.tasks.list(),
     store.recipes.list(),
     store.inventory.list(),
+    store.placements.list(),
   ]);
-  return { tasks, recipes, inventory };
+  return { tasks, recipes, inventory, placements };
 }
 
 /** All persistent kitchen state, loaded from and written through the platform store. */
@@ -82,11 +94,13 @@ export function useKitchen(store: WokflowStore): Kitchen {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [placements, setPlacements] = useState<Placement[]>([]);
 
   const apply = useCallback((snapshot: Snapshot) => {
     setTasks(snapshot.tasks);
     setRecipes(snapshot.recipes);
     setInventory(snapshot.inventory);
+    setPlacements(snapshot.placements);
     setLoaded(true);
   }, []);
 
@@ -103,8 +117,9 @@ export function useKitchen(store: WokflowStore): Kitchen {
     };
   }, [store, apply]);
 
+  /** Adjust any inventory item: a currency (WalletId) or an owned decor item. */
   const earn = useCallback(
-    async (id: WalletId, amount: number) => {
+    async (id: string, amount: number) => {
       await store.inventory.put(
         adjustInventory(await store.inventory.get(id), id, amount, nowIso()),
       );
@@ -238,6 +253,24 @@ export function useKitchen(store: WokflowStore): Kitchen {
     [store, reload],
   );
 
+  const buyDecor = useCallback<Kitchen['buyDecor']>(
+    async (id) => {
+      const items = await store.inventory.list();
+      const deltas = purchase(items, readWallet(items), id);
+      for (const [itemId, delta] of deltas) await earn(itemId, delta);
+      await reload();
+    },
+    [store, earn, reload],
+  );
+
+  const setDecorVisible = useCallback<Kitchen['setDecorVisible']>(
+    async (id, visible) => {
+      await store.placements.put({ id, visible, updatedAt: nowIso() });
+      await reload();
+    },
+    [store, reload],
+  );
+
   const earnAndReload = useCallback<Kitchen['earn']>(
     async (id, amount) => {
       await earn(id, amount);
@@ -251,6 +284,11 @@ export function useKitchen(store: WokflowStore): Kitchen {
     tasks,
     recipes,
     wallet: readWallet(inventory),
+    inventory,
+    placements,
+    decor: visibleDecor(inventory, placements),
+    buyDecor,
+    setDecorVisible,
     saveTask,
     deleteTask,
     toggleDone,

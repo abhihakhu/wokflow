@@ -46,6 +46,10 @@ wokflow/
 
 Decisions: [stack](docs/adr/0001-monorepo-and-stack.md) · [character packs](docs/adr/0002-character-packs.md) · [leave detection](docs/adr/0003-leave-detection.md) · [visual direction](docs/adr/0004-visual-direction.md) · [SQLite storage](docs/adr/0005-sqlite-storage.md) · [kitchen scene](docs/adr/0006-kitchen-scene.md)
 
+## Download
+
+Installers for macOS, Windows and Linux are attached to each [release](https://github.com/abhihakhu/wokflow/releases). The app isn't code-signed yet: on macOS, right-click WokFlow in Applications and choose **Open** the first time; on Windows, choose **More info → Run anyway**.
+
 ## Getting started
 
 Requires Node 22+ and pnpm 10 (`corepack enable`).
@@ -56,6 +60,7 @@ pnpm dev          # browser build at http://localhost:5173 (demo data, resets on
 pnpm test         # unit tests
 pnpm coverage     # with coverage thresholds (80%)
 pnpm lint && pnpm typecheck
+pnpm pack:default # redraw Ember's sprite sheets (scripts/build-default-pack.mjs)
 ```
 
 ### Desktop app (Tauri)
@@ -74,9 +79,15 @@ pnpm tauri build  # installer in src-tauri/target/release/bundle
 - [x] **M2** SQLite storage (Tauri), task editing, recipes and signature dishes, persistent wallet
 - [x] **M3** PixiJS kitchen scene + default companion art (README GIF still to record)
 - [x] **M4** Settings: in-app companion picker, default session length, away grace period, motion preference
-- [ ] **M5** Rewards UI, decor → **v0.1 release**
+- [x] **M5** Market with kitchen decor, app icon, release workflow → **v0.1**
 - [ ] **M6** Android (Capacitor) + local notifications → v0.2
 - [ ] Later: sync, Harbor Map, iCal deadline import, LLM-generated recipes and quizzes
+
+## Releasing
+
+1. Bump the version in `apps/desktop/src-tauri/tauri.conf.json` and add an entry to [CHANGELOG.md](CHANGELOG.md).
+2. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`.
+3. The Release workflow builds installers on macOS, Windows and Linux and attaches them to a **draft** release. Review it on GitHub and publish.
 
 ## License
 

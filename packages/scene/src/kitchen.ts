@@ -10,6 +10,7 @@ import {
 } from 'pixi.js';
 import { animationFor, type CharacterPack } from '@wokflow/companion';
 import type { CompanionState } from '@wokflow/core';
+import { DECOR_ART } from './decor.js';
 import { flameShapes, FIRE } from './flame.js';
 import { coverFit } from './layout.js';
 import { SCENE_PARAMS, approach, type SceneParams } from './params.js';
@@ -36,12 +37,18 @@ export interface KitchenOptions {
   pack: CharacterPack;
   /** Turn a file name from pack.json into a loadable URL. */
   resolvePackFile(file: string): string;
+  /** Turn a decor art file name (assets/decor/*.svg) into a loadable URL. */
+  resolveDecorFile?(file: string): string;
+  /** Decor item ids to show initially. */
+  decor?: string[];
   initialState?: CompanionState;
   reducedMotion?: boolean;
 }
 
 export interface KitchenScene {
   setState(state: CompanionState): void;
+  /** Show exactly these decor items (unknown ids are ignored). */
+  setDecor(ids: readonly string[]): void;
   setReducedMotion(reduced: boolean): void;
   destroy(): void;
 }
@@ -119,6 +126,8 @@ export async function mountKitchen(
   const world = new Container();
   app.stage.addChild(world);
   world.addChild(new Sprite(backTex));
+  const wallDecor = new Container();
+  world.addChild(wallDecor);
 
   const lanterns = LANTERNS.map((spec) => {
     const glow = new Sprite(glowTex);
@@ -136,6 +145,8 @@ export async function mountKitchen(
   });
 
   world.addChild(new Sprite(frontTex));
+  const counterDecor = new Container();
+  world.addChild(counterDecor);
 
   const fireGlow = new Sprite(glowTex);
   fireGlow.anchor.set(0.5);
@@ -242,7 +253,42 @@ export async function mountKitchen(
   else draw();
 
   let destroyed = false;
+  const decorSprites = new Map<string, Sprite>();
+  let wantedDecor = new Set<string>();
+
+  const applyDecor = async (ids: readonly string[]) => {
+    wantedDecor = new Set(ids.filter((id) => DECOR_ART[id]));
+    for (const [id, sprite] of decorSprites) {
+      if (!wantedDecor.has(id)) {
+        sprite.destroy();
+        decorSprites.delete(id);
+      }
+    }
+    if (!options.resolveDecorFile) return;
+    for (const id of wantedDecor) {
+      if (decorSprites.has(id)) continue;
+      const art = DECOR_ART[id]!;
+      try {
+        const texture = await svg(options.resolveDecorFile(art.file));
+        // The wanted set may have changed while the texture loaded.
+        if (destroyed || !wantedDecor.has(id) || decorSprites.has(id)) continue;
+        const sprite = new Sprite(texture);
+        sprite.anchor.set(art.anchorX, art.anchorY);
+        sprite.position.set(art.x, art.y);
+        sprite.scale.set(art.scale);
+        (art.layer === 'wall' ? wallDecor : counterDecor).addChild(sprite);
+        decorSprites.set(id, sprite);
+      } catch (err) {
+        console.warn(`[wokflow] decor "${id}" not shown:`, err);
+      }
+    }
+  };
+  void applyDecor(options.decor ?? []);
+
   return {
+    setDecor(ids) {
+      if (!destroyed) void applyDecor(ids);
+    },
     setState(next) {
       if (destroyed || next === state) return;
       state = next;

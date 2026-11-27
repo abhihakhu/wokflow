@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="140" viewBox="0 0 180 140">
+  <!-- wall shelf with brackets -->
+  <rect x="22" y="90" width="136" height="12" rx="2" fill="#5C3020"/>
+  <rect x="22" y="90" width="136" height="3" fill="#8A5A36"/>
+  <path d="M40 102 h14 l-14 26 z" fill="#6B3A26"/>
+  <path d="M140 102 h-14 l14 26 z" fill="#6B3A26"/>
+  <path d="M20 54 q70 66 140 0 z" fill="#D9A43F"/>
+  <path d="M28 58 q62 50 124 0" fill="none" stroke="#F3DCA4" stroke-width="5" opacity="0.8"/>
+  <path d="M16 52 h148" stroke="#E3C27A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M164 50 q16 -6 14 -22" stroke="#E3C27A" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M8 50 q-6 -10 6 -14" stroke="#E3C27A" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <g fill="#FFF4D0">
+    <path transform="translate(44 30)" d="M0 -10 L2 -2 L10 0 L2 2 L0 10 L-2 2 L-10 0 L-2 -2 Z"/>
+    <path transform="translate(138 18) scale(0.7)" d="M0 -10 L2 -2 L10 0 L2 2 L0 10 L-2 2 L-10 0 L-2 -2 Z"/>
+    <path transform="translate(100 34) scale(0.5)" d="M0 -10 L2 -2 L10 0 L2 2 L0 10 L-2 2 L-10 0 L-2 -2 Z"/>
+  </g>
+</svg>

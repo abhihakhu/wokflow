@@ -20,6 +20,7 @@ import type { Platform } from '@wokflow/data';
 import { selectPack } from './packs';
 import { useSettings } from './state/useSettings';
 import { SettingsView } from './views/SettingsView';
+import { Shop } from './views/Shop';
 import { useKitchen } from './state/useKitchen';
 import { Menu } from './views/Menu';
 import { RecipeEditor } from './views/RecipeEditor';
@@ -37,7 +38,8 @@ type Panel =
   | { view: 'prep'; task: Task }
   | { view: 'editTask'; task: Task | undefined }
   | { view: 'editRecipe'; recipe: Recipe | undefined }
-  | { view: 'settings' };
+  | { view: 'settings' }
+  | { view: 'shop' };
 
 export function App({ platform }: { platform: Platform }) {
   const kitchen = useKitchen(platform.store);
@@ -106,6 +108,14 @@ export function App({ platform }: { platform: Platform }) {
           )}
           <button
             type="button"
+            className="btn small market-btn"
+            disabled={Boolean(session)}
+            onClick={() => setPanel({ view: 'shop' })}
+          >
+            Market
+          </button>
+          <button
+            type="button"
             className="icon-btn on-wood"
             aria-label="Settings"
             disabled={Boolean(session)}
@@ -131,7 +141,12 @@ export function App({ platform }: { platform: Platform }) {
         <section className="scene" aria-label="Kitchen">
           <Suspense fallback={null}>
             {settingsState.loaded && (
-              <KitchenScene state={companionState} companion={companion} motion={settings.motion} />
+              <KitchenScene
+                state={companionState}
+                companion={companion}
+                motion={settings.motion}
+                decor={kitchen.decor}
+              />
             )}
           </Suspense>
           <p className="bubble" aria-live="polite">
@@ -244,6 +259,7 @@ export function App({ platform }: { platform: Platform }) {
           {!session && panel.view === 'settings' && settingsState.loaded && (
             <SettingsView state={settingsState} onDone={backToMenu} />
           )}
+          {!session && panel.view === 'shop' && <Shop kitchen={kitchen} onDone={backToMenu} />}
         </aside>
       </main>
     </div>
