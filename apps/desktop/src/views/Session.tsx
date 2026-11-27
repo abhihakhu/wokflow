@@ -1,21 +1,26 @@
 import { useState } from 'react';
 import type { FocusRating, Session, Task } from '@wokflow/core';
 
-const DURATIONS = [25, 45, 60, 90] as const;
+const DURATIONS = [25, 45, 60, 90];
 const RATINGS: FocusRating[] = [1, 2, 3, 4, 5];
 
 export function Prep({
   task,
+  defaultMin = 25,
   onStart,
   onCancel,
 }: {
   task: Task;
+  defaultMin?: number;
   onStart(input: { firstStep: string; intent: string; plannedMin: number }): void;
   onCancel(): void;
 }) {
   const [firstStep, setFirstStep] = useState('');
   const [intent, setIntent] = useState('');
-  const [plannedMin, setPlannedMin] = useState<number>(25);
+  const [plannedMin, setPlannedMin] = useState<number>(defaultMin);
+  const durations = DURATIONS.includes(defaultMin)
+    ? DURATIONS
+    : [...DURATIONS, defaultMin].sort((a, b) => a - b);
   const ready = firstStep.trim() !== '' && intent.trim() !== '';
 
   return (
@@ -39,7 +44,7 @@ export function Prep({
       </label>
       <fieldset className="pills">
         <legend>Simmer for</legend>
-        {DURATIONS.map((d) => (
+        {durations.map((d) => (
           <button
             key={d}
             type="button"

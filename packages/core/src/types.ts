@@ -90,3 +90,17 @@ export interface InventoryItem {
   qty: number;
   updatedAt: Timestamp;
 }
+
+/** Whether an owned decor item is shown in the kitchen. `id` is the decor item's id. */
+export interface Placement {
+  id: string;
+  visible: boolean;
+  updatedAt: Timestamp;
+}
+
+/** The single settings row. Its contents are read with parseSettings(). */
+export interface SettingsRecord {
+  id: 'settings';
+  values: Record<string, unknown>;
+  updatedAt: Timestamp;
+}

@@ -56,7 +56,9 @@ Validated by `@wokflow/companion` (`parsePack`). Every pack must animate four st
 
 ## Using your pack
 
-Packs are bundled at build time, so a folder in `packs/` is all it takes. Pick one with an environment variable:
+Packs are bundled at build time, so a folder in `packs/` is all it takes. Restart `pnpm tauri dev`, open **Settings** (the gear in the header) and pick your companion; the picker shows each pack's first idle frame, and explains what's wrong with any pack that fails validation.
+
+For quick testing you can also preselect one with an environment variable (the choice in Settings wins once you've saved one):
 
 ```bash
 cd apps/desktop

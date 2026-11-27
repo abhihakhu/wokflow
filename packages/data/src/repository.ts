@@ -1,4 +1,12 @@
-import type { InventoryItem, ParkingLotItem, Recipe, Session, Task } from '@wokflow/core';
+import type {
+  InventoryItem,
+  ParkingLotItem,
+  Placement,
+  Recipe,
+  Session,
+  SettingsRecord,
+  Task,
+} from '@wokflow/core';
 
 /**
  * A minimal async collection. Every platform adapter (memory, Tauri SQL,
@@ -19,6 +27,8 @@ export interface WokflowStore {
   sessions: Collection<Session>;
   parkingLot: Collection<ParkingLotItem>;
   inventory: Collection<InventoryItem>;
+  placements: Collection<Placement>;
+  settings: Collection<SettingsRecord>;
 }
 
 /**

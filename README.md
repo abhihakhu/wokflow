@@ -73,7 +73,7 @@ pnpm tauri build  # installer in src-tauri/target/release/bundle
 - [x] **M1** Monorepo, CI, core domain + tests, data interfaces, pack schema, working Prep → Simmer → Plate loop
 - [x] **M2** SQLite storage (Tauri), task editing, recipes and signature dishes, persistent wallet
 - [x] **M3** PixiJS kitchen scene + default companion art (README GIF still to record)
-- [ ] **M4** In-app pack picker (packs already load from `packs/` at build time; see [packs/README.md](packs/README.md))
+- [x] **M4** Settings: in-app companion picker, default session length, away grace period, motion preference
 - [ ] **M5** Rewards UI, decor → **v0.1 release**
 - [ ] **M6** Android (Capacitor) + local notifications → v0.2
 - [ ] Later: sync, Harbor Map, iCal deadline import, LLM-generated recipes and quizzes

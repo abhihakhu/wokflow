@@ -33,5 +33,7 @@ export function createMemoryStore(seed: StoreSeed = {}): WokflowStore {
     sessions: createMemoryCollection(seed.sessions),
     parkingLot: createMemoryCollection(seed.parkingLot),
     inventory: createMemoryCollection(seed.inventory),
+    placements: createMemoryCollection(seed.placements),
+    settings: createMemoryCollection(seed.settings),
   };
 }

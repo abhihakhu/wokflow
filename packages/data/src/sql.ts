@@ -20,7 +20,14 @@ export const TABLES = {
   sessions: 'sessions',
   parkingLot: 'parking_lot',
   inventory: 'inventory',
+  placements: 'placements',
+  settings: 'settings',
 } as const satisfies Record<keyof WokflowStore, string>;
+
+const documentTable = (table: string) => [
+  `CREATE TABLE IF NOT EXISTS ${table} (id TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL, updated_at TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS ${table}_updated_at ON ${table} (updated_at)`,
+];
 
 export interface Migration {
   version: number;
@@ -38,10 +45,18 @@ export const MIGRATIONS: readonly Migration[] = [
   {
     version: 1,
     name: 'document tables',
-    statements: Object.values(TABLES).flatMap((table) => [
-      `CREATE TABLE IF NOT EXISTS ${table} (id TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL, updated_at TEXT NOT NULL)`,
-      `CREATE INDEX IF NOT EXISTS ${table}_updated_at ON ${table} (updated_at)`,
-    ]),
+    statements: [
+      TABLES.tasks,
+      TABLES.recipes,
+      TABLES.sessions,
+      TABLES.parkingLot,
+      TABLES.inventory,
+    ].flatMap(documentTable),
+  },
+  {
+    version: 2,
+    name: 'settings and decor placements',
+    statements: [TABLES.placements, TABLES.settings].flatMap(documentTable),
   },
 ];
 
@@ -111,5 +126,7 @@ export async function createSqlStore(driver: SqlDriver): Promise<WokflowStore> {
     sessions: sqlCollection(driver, TABLES.sessions),
     parkingLot: sqlCollection(driver, TABLES.parkingLot),
     inventory: sqlCollection(driver, TABLES.inventory),
+    placements: sqlCollection(driver, TABLES.placements),
+    settings: sqlCollection(driver, TABLES.settings),
   };
 }
